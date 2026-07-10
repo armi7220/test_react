@@ -14,6 +14,7 @@ class TestDbMonitor(unittest.TestCase):
         self.db = DatabaseService(db_path=self.test_db_path)
         self.db.init_database()
 
+
     def tearDown(self):
         """テスト終了後にテスト用DBを削除"""
         # SQLiteのコネクション解放待ちのため少し安全に消す
