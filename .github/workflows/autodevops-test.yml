@@ -19,18 +19,17 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x' # Use the latest Python 3.x version
+          python-version: '3.11' # Python 3.11を使用
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r weather-forecast-app/requirements.txt
-          # Install pytest if not already in requirements.txt
-          pip install pytest
 
       - name: Run tests
         run: |
-          pytest weather-forecast-app/tests/
+          # weather-forecast-app/tests/ ディレクトリ内のテストを実行
+          python -m pytest weather-forecast-app/tests/
 
       - name: Notify AutoDevOps on failure
         if: failure()
