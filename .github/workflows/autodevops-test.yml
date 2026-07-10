@@ -11,7 +11,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,20 +18,18 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' # 推論されたPythonの最新安定版を使用
+          python-version: '3.x'
 
       - name: Install dependencies
-        working-directory: weather-forecast-app # weather-forecast-appディレクトリをカレントディレクトリとして実行
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          # pytestがrequirements.txtに含まれていない場合を考慮して明示的にインストール
-          pip install pytest
+          pip install -r weather-forecast-app/requirements.txt
 
       - name: Run tests
-        working-directory: weather-forecast-app # weather-forecast-appディレクトリをカレントディレクトリとして実行
         run: |
-          pytest tests/
+          cd weather-forecast-app
+          pip install pytest
+          pytest
 
       - name: Notify AutoDevOps on failure
         if: failure()
