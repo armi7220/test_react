@@ -32,16 +32,3 @@ jobs:
     - name: Run tests
       run: |
         python -m unittest discover tests
-
-    - name: Notify AutoDevOps on failure
-      if: failure()
-      run: |
-        BRANCH="${{ github.head_ref || github.ref_name }}"
-        COMMIT_MSG="${{ github.event.head_commit.message }}"
-        if [[ "$BRANCH" == fix/agent-* ]] || echo "$COMMIT_MSG" | grep -qE "\[Auto-Fix\]|fix: AutoDevOps Agent|docs: Add incident|fix: Self-Healing Agent"; then
-          echo "Skipping AutoDevOps notification for auto-fix branch or commit."
-          exit 0
-        fi
-        curl -s -X POST -H "Content-Type: application/json" \
-        -d "{\"workflow_run\": {\"name\": \"${{ github.workflow }}\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"${{ github.event.head_commit.timestamp }}\"}, \"repository\": {\"full_name\": \"${{ github.repository }}\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
-        "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=7cWF7aydiYO93EFYIl5mtcFQoqg1"
