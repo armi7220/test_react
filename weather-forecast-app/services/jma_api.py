@@ -38,7 +38,7 @@ class JmaApiService:
             return None
         
     @staticmethod
-    def get_weather_forecast(area_code):
+    def get_weather_forecast(code): 
         try:
             # 修正: area_code ではなく引数の code を使用
             url = JmaApiService.FORECAST_URL.format(area_code = area_code)
