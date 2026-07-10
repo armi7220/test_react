@@ -41,8 +41,8 @@ class JmaApiService:
     def get_weather_forecast(area_code):
         try:
             # 修正: area_code ではなく引数の code を使用
-            url = JmaApiService.FORECAST_URL.format(area_code = code)
-            print(f"天気予報を取得中（地域コード:{code}）") # 修正: area_code ではなく引数の code を使用
+            url = JmaApiService.FORECAST_URL.format(area_code = area_code)
+            print(f"天気予報を取得中（地域コード:{area_code}）") # 修正: area_code ではなく引数の code を使用
             
             response = requests.get(url,timeout = 10)
             response.raise_for_status()
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     
         print('地域の例（最初５件）')
         for i, (code,info) in enumerate(list(areas.get('offices',{}).items())[:5]):
-            print(f"{i+1}.{info['name']:15}(コード：{code}")
+            print(f"{i+1}.{info['name']:15}(コード：{code})")
         
     else:
         print("地域リストの取得に失敗しました")
