@@ -1,4 +1,4 @@
-name: AutoDevOps Test
+name: AutoDevOps Test Workflow
 
 on:
   push:
@@ -19,24 +19,51 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x' # 最新の安定版Pythonを使用
+          python-version: '3.x' # Or specify a version like '3.9', '3.10', '3.11'
 
       - name: Install dependencies
-        run: pip install -r weather-forecast-app/requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r weather-forecast-app/requirements.txt
+          # Install pytest if not already in requirements.txt
+          pip install pytest
 
       - name: Run tests
-        working-directory: weather-forecast-app
-        run: pytest tests/
+        run: |
+          pytest weather-forecast-app/tests/
 
       - name: Notify AutoDevOps on failure
         if: failure()
         run: |
-          BRANCH="${ github.head_ref || github.ref_name }"
-          COMMIT_MSG="${ github.event.head_commit.message }"
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          
+          # Escape double quotes in commit message for JSON payload
+          ESCAPED_COMMIT_MSG=$(echo "$COMMIT_MSG" | sed 's/"/\\"/g')
+
           if [[ "$BRANCH" == fix/agent-* ]] || echo "$COMMIT_MSG" | grep -qE "\[Auto-Fix\]|fix: AutoDevOps Agent|docs: Add incident|fix: Self-Healing Agent"; then
             echo "Skipping AutoDevOps notification for auto-fix branch or commit."
             exit 0
           fi
+          
+          # Construct JSON payload
+          JSON_PAYLOAD=$(cat <<EOF
+{
+  "workflow_run": {
+    "name": "${{ github.workflow }}",
+    "head_branch": "$BRANCH",
+    "updated_at": "${{ github.event.head_commit.timestamp }}"
+  },
+  "repository": {
+    "full_name": "${{ github.repository }}"
+  },
+  "action": "completed",
+  "conclusion": "failure",
+  "commit_message": "$ESCAPED_COMMIT_MSG"
+}
+EOF
+)
+          
           curl -s -X POST -H "Content-Type: application/json" \
-          -d "{\"workflow_run\": {\"name\": \"${ github.workflow }\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"${ github.event.head_commit.timestamp }\"}, \"repository\": {\"full_name\": \"${ github.repository }\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
+          -d "$JSON_PAYLOAD" \
           "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=7cWF7aydiYO93EFYIl5mtcFQoqg1"
