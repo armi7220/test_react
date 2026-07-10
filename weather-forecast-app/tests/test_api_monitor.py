@@ -20,5 +20,11 @@ class TestApiMonitor(unittest.TestCase):
         tokyo_code = "130000"
         weather = JmaApiService.get_weather_forecast(tokyo_code)
         self.assertIsNotNone(weather, "天気予報の取得に失敗しました。")
+        self.assertIsInstance(weather, list, "天気予報のレスポンスがリストではありません。")
         self.assertTrue(len(weather) > 0, "天気予報の配列が空です。")
         self.assertIn("timeSeries", weather[0], "予報データに 'timeSeries' が含まれていません。")
+        self.assertIsInstance(weather[0]['timeSeries'], list, "timeSeriesがリストではありません。")
+        self.assertTrue(len(weather[0]['timeSeries']) > 0, "timeSeriesが空です。")
+        self.assertIn("areas", weather[0]['timeSeries'][0], "timeSeries[0]に'areas'が含まれていません。")
+        self.assertIsInstance(weather[0]['timeSeries'][0]['areas'], list, "timeSeries[0]['areas']がリストではありません。")
+        self.assertTrue(len(weather[0]['timeSeries'][0]['areas']) > 0, "timeSeries[0]['areas']が空です。")
