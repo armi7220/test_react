@@ -41,7 +41,7 @@ class JmaApiService:
     def get_weather_forecast(code): 
         try:
             # 修正: area_code ではなく引数の code を使用
-            url = JmaApiService.FORECAST_URL.format(area_code = code)
+            url = JmaApiService.FORECAST_URL.format(areacode = code)
             print(f"天気予報を取得中（地域コード:{code}）")
             
             response = requests.get(url,timeout = 10)
