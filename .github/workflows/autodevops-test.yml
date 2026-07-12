@@ -13,33 +13,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x' # Use the latest stable Python 3 version
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x' # Use the latest stable Python 3 version
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r weather-forecast-app/requirements.txt
-          pip install pytest # Ensure pytest is installed for running tests
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r weather-forecast-app/requirements.txt
+        # Install pytest for running tests, assuming it's not always in requirements.txt
+        pip install pytest
 
-      - name: Run tests
-        run: |
-          pytest weather-forecast-app/tests/
+    - name: Run tests
+      run: |
+        # Change directory to the application root to ensure correct module imports
+        cd weather-forecast-app
+        pytest tests/
 
-      - name: Notify AutoDevOps on failure
-        if: failure()
-        run: |
-          BRANCH="${{ github.head_ref || github.ref_name }}"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
-          if [[ "$BRANCH" == fix/agent-* ]] || echo "$COMMIT_MSG" | grep -qE "\[Auto-Fix\]|fix: AutoDevOps Agent|docs: Add incident|fix: Self-Healing Agent"; then
-            echo "Skipping AutoDevOps notification for auto-fix branch or commit."
-            exit 0
-          fi
-          curl -s -X POST -H "Content-Type: application/json" \
-          -d "{\"workflow_run\": {\"name\": \"${{ github.workflow }}\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"${{ github.event.head_commit.timestamp }}\"}, \"repository\": {\"full_name\": \"${{ github.repository }}\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
-          "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=TFgfQCigwFOeJMaUKhSW6N1zUsw1"
+    - name: Notify AutoDevOps on failure
+      if: failure()
+      run: |
+        BRANCH="${{ github.head_ref || github.ref_name }}"
+        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        if [[ "$BRANCH" == fix/agent-* ]] || echo "$COMMIT_MSG" | grep -qE "\[Auto-Fix\]|fix: AutoDevOps Agent|docs: Add incident|fix: Self-Healing Agent"; then
+          echo "Skipping AutoDevOps notification for auto-fix branch or commit."
+          exit 0
+        fi
+        curl -s -X POST -H "Content-Type: application/json" \
+        -d "{\"workflow_run\": {\"name\": \"${{ github.workflow }}\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"${{ github.event.head_commit.timestamp }}\"}, \"repository\": {\"full_name\": \"${{ github.repository }}\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
+        "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=TFgfQCigwFOeJMaUKhSW6N1zUsw1"
