@@ -1,4 +1,4 @@
-name: AutoDevOps Test Workflow
+name: AutoDevOps Test
 
 on:
   push:
@@ -17,19 +17,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # Python 3.10 を使用
+          python-version: '3.x' # Use the latest Python 3.x version
 
       - name: Install dependencies
+        working-directory: ./weather-forecast-app
         run: |
           python -m pip install --upgrade pip
-          pip install -r weather-forecast-app/requirements.txt
-          pip install pytest # テストフレームワークをインストール
+          pip install -r requirements.txt
+          pip install pytest # Install pytest for running tests
 
       - name: Run tests
+        working-directory: ./weather-forecast-app
         run: |
-          pytest weather-forecast-app/tests/
+          pytest tests/
 
       - name: Notify AutoDevOps on failure
         if: failure()
