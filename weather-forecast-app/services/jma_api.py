@@ -41,8 +41,9 @@ class JmaApiService:
     def get_weather_forecast(area_code): 
         try:
             # 修正: FORECAST_URLのプレースホルダー名に合わせてキーワード引数を 'area_code' に変更
-            url = JmaApiService.FORECAST_URL.format(area_code = a_code)
-            print(f"天気予報を取得中（地域コード:{a_code}）")
+            # 引数名 'area_code' を正しく使用
+            url = JmaApiService.FORECAST_URL.format(area_code = area_code)
+            print(f"天気予報を取得中（地域コード:{area_code}）")
             
             response = requests.get(url,timeout = 10)
             response.raise_for_status()
