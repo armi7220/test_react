@@ -37,7 +37,7 @@ class JmaApiService:
             print(f'エラー：予期しないエラー:{e}')
             return None
         
-    @staticmethod
+    @staticmethod 
     def get_weather_forecast(area_code): 
         try:
             url = JmaApiService.FORECAST_URL.format(a_code)
