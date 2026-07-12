@@ -40,8 +40,9 @@ class JmaApiService:
     @staticmethod 
     def get_weather_forecast(area_code): 
         try:
-            url = JmaApiService.FORECAST_URL.format(a_code)
-            print(f"天気予報を取得中（地域コード:{a_code}）")
+            # 修正: a_code ではなく area_code を使用
+            url = JmaApiService.FORECAST_URL.format(area_code=area_code)
+            print(f"天気予報を取得中（地域コード:{area_code}）")
             
             response = requests.get(url,timeout = 10)
             response.raise_for_status()
