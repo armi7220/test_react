@@ -1,4 +1,4 @@
-name: AutoDevOps Test
+name: AutoDevOps Test Workflow
 
 on:
   push:
@@ -19,13 +19,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x' # Use the latest stable Python 3.x version
+          python-version: '3.x' # Use the latest stable Python 3 version
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest # Install pytest for running tests
           pip install -r weather-forecast-app/requirements.txt
+          pip install pytest # Ensure pytest is installed for running tests
 
       - name: Run tests
         run: |
@@ -42,4 +42,4 @@ jobs:
           fi
           curl -s -X POST -H "Content-Type: application/json" \
           -d "{\"workflow_run\": {\"name\": \"${{ github.workflow }}\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"${{ github.event.head_commit.timestamp }}\"}, \"repository\": {\"full_name\": \"${{ github.repository }}\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
-          "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=7cWF7aydiYO93EFYIl5mtcFQoqg1"
+          "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=TFgfQCigwFOeJMaUKhSW6N1zUsw1"
