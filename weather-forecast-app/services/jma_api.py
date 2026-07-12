@@ -38,7 +38,7 @@ class JmaApiService:
             return None
         
     @staticmethod
-    def get_weather_forecast(area_code): 
+    def get_weather_forecast(a_code): 
         try:
             # 修正: FORECAST_URLのプレースホルダー名に合わせてキーワード引数を 'area_code' に変更
             # 引数名 'area_code' を正しく使用
