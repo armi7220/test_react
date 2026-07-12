@@ -19,28 +19,52 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.x' # Use the latest stable Python 3 version
+        python-version: '3.x' # Use the latest stable Python 3.x
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r weather-forecast-app/requirements.txt
-        # Install pytest as it's commonly used for testing Python projects
+        # Assuming pytest is used for testing, install it if not in requirements.txt
         pip install pytest
 
     - name: Run tests
       run: |
+        # Assuming tests are located in weather-forecast-app/tests/ and use pytest
         pytest weather-forecast-app/tests/
 
     - name: Notify AutoDevOps on failure
       if: failure()
       run: |
         BRANCH="${{ github.head_ref || github.ref_name }}"
-        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        COMMIT_MSG=""
+        UPDATED_AT=""
+
+        # Determine COMMIT_MSG and UPDATED_AT based on event type
+        if [[ "${{ github.event_name }}" == "push" ]]; then
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          UPDATED_AT="${{ github.event.head_commit.timestamp }}"
+        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          COMMIT_MSG="${{ github.event.pull_request.title }}"
+          UPDATED_AT="${{ github.event.pull_request.updated_at }}"
+        else
+          # Fallback for other event types, though not expected for this workflow
+          COMMIT_MSG="Unknown commit message for ${{ github.event_name }} event"
+          UPDATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+        fi
+
+        # Skip notification for auto-fix branches or commits to prevent infinite loops
         if [[ "$BRANCH" == fix/agent-* ]] || echo "$COMMIT_MSG" | grep -qE "\[Auto-Fix\]|fix: AutoDevOps Agent|docs: Add incident|fix: Self-Healing Agent"; then
           echo "Skipping AutoDevOps notification for auto-fix branch or commit."
           exit 0
         fi
+
+        # Ensure UPDATED_AT is not empty for JSON payload
+        if [[ -z "$UPDATED_AT" ]]; then
+          UPDATED_AT="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+        fi
+
+        # Send failure notification to AutoDevOps webhook
         curl -s -X POST -H "Content-Type: application/json" \
-        -d "{\"workflow_run\": {\"name\": \"${{ github.workflow }}\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"${{ github.event.head_commit.timestamp }}\"}, \"repository\": {\"full_name\": \"${{ github.repository }}\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
+        -d "{\"workflow_run\": {\"name\": \"${{ github.workflow }}\", \"head_branch\": \"$BRANCH\", \"updated_at\": \"$UPDATED_AT\"}, \"repository\": {\"full_name\": \"${{ github.repository }}\"}, \"action\": \"completed\", \"conclusion\": \"failure\"}" \
         "https://autodevops-merge-worker-617819190113.asia-northeast1.run.app/webhook/github_actions?user_id=TFgfQCigwFOeJMaUKhSW6N1zUsw1"
